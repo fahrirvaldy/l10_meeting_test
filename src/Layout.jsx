@@ -49,7 +49,7 @@ export const Header = () => {
           L10 Meeting
         </h1>
         <p className="m-0 hidden truncate text-[10px] font-extrabold uppercase tracking-[0.2em] text-aksana-accent sm:block md:text-xs">
-          GWK
+          test
         </p>
       </div>
 

@@ -182,7 +182,7 @@ export const SlideCover = ({ isActive }) => {
               {data.meetingDate || 'Tanggal belum diatur'}
             </div>
             <p className="mt-4 text-sm font-bold uppercase tracking-[0.22em] text-aksana-accent">
-              GWK
+              test
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-slate-100 bg-slate-50/80 px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500">
