@@ -565,9 +565,13 @@ export const SlideIdsDiscuss = ({ isActive, exportMode, exportThemeIndex }) => {
     persistThemes((currentThemes) =>
       currentThemes.map((item, index) => {
         if (index !== effectiveTab) return item;
-        return typeof patchOrUpdater === 'function'
-          ? patchOrUpdater(item)
-          : { ...item, ...patchOrUpdater };
+        // Selalu gabungkan patch ke tema yang sudah ada. Updater di bawah
+        // ada yang mengembalikan objek parsial (mis. hanya `{ tasks }`),
+        // sehingga mengembalikannya apa adanya akan menghapus `topic`,
+        // `currentCond`, `desiredCond`, dan field lainnya dari tema.
+        const patch =
+          typeof patchOrUpdater === 'function' ? patchOrUpdater(item) : patchOrUpdater;
+        return { ...item, ...patch };
       }),
     );
   };
