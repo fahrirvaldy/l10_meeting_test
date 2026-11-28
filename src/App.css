@@ -1,0 +1,390 @@
+/* ==========================================================================
+   Panggung ekspor (html2canvas)
+   --------------------------------------------------------------------------
+   Saat `body.exporting-image` aktif, #pdf-content dipaksa menjadi kanvas
+   1280px. html2canvas mengkloning dokumen ini pada viewport virtual 1280px,
+   sehingga breakpoint desktop selalu dipakai dan tinggi konten bisa diukur
+   secara deterministik (tanpa header/footer aplikasi).
+   ========================================================================== */
+
+body.exporting-image * {
+  --tw-text-opacity: 1 !important;
+  --tw-bg-opacity: 1 !important;
+  --tw-border-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+/* Aturan global di atas memaksa semua elemen terlihat agar teks tidak pudar.
+   Elemen yang memang sengaja disembunyikan dengan Tailwind `opacity-0`
+   (mis. ikon centang peserta yang tidak hadir) harus tetap tersembunyi. */
+body.exporting-image .opacity-0 {
+  opacity: 0 !important;
+}
+
+body.exporting-image,
+body.exporting-image html,
+body.exporting-image #root {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+body.exporting-image #pdf-content {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  display: block !important;
+  width: 1280px !important;
+  max-width: 1280px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background-color: #f8fafc !important;
+}
+
+body.exporting-image section.slide {
+  display: none !important;
+}
+
+body.exporting-image section.slide.active {
+  display: flex !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 32px 48px 40px !important;
+  overflow: visible !important;
+  background-color: #f8fafc !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Jangan biarkan panel ber-scroll memotong isi saat difoto. */
+body.exporting-image .card,
+body.exporting-image .custom-scrollbar,
+body.exporting-image [role="tabpanel"],
+body.exporting-image .overflow-y-auto,
+body.exporting-image .overflow-x-auto,
+body.exporting-image .overflow-hidden {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+/* Daftar isu IDS: cetak satu kolom, teks penuh, tanpa batas tinggi. */
+body.exporting-image .issue-grid {
+  grid-template-columns: 1fr !important;
+}
+
+body.exporting-image .issue-row {
+  min-height: 0 !important;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  break-inside: avoid;
+  /* Checkbox sudah dihapus dari UI, tombol aksi diabaikan saat ekspor.
+     Paksa satu kolom penuh agar teks isu memakai lebar baris. */
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Kolom aksi kosong setelah tombolnya dihapus saat ekspor; sembunyikan agar
+   tidak menghasilkan baris grid kosong + gap ekstra di tiap baris isu. */
+body.exporting-image .issue-row-actions {
+  display: none !important;
+}
+
+body.exporting-image .issue-text {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-box-orient: unset !important;
+  -webkit-line-clamp: unset !important;
+  white-space: normal !important;
+}
+
+/* Nama/pengenal panjang tidak boleh dipotong dengan ellipsis di PDF. */
+body.exporting-image #pdf-content .truncate {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+body.exporting-image .h-full {
+  height: auto !important;
+}
+
+/* Editable: tampilkan teks asli, sembunyikan textarea. */
+body.exporting-image .print-clone {
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+body.exporting-image .print-textarea {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body.exporting-image textarea {
+  -webkit-text-fill-color: currentColor !important;
+  color: inherit !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  text-shadow: none !important;
+}
+
+/* Warna teks dipaksa solid agar tidak pudar akibat opacity/animasi. */
+body.exporting-image .text-black { color: #000000 !important; }
+body.exporting-image .text-slate-800 { color: #1e293b !important; }
+body.exporting-image .text-slate-700 { color: #334155 !important; }
+body.exporting-image .text-slate-600 { color: #475569 !important; }
+body.exporting-image .text-slate-500 { color: #64748b !important; }
+body.exporting-image .text-slate-400 { color: #94a3b8 !important; }
+body.exporting-image .text-emerald-500 { color: #10b981 !important; }
+body.exporting-image .text-emerald-700 { color: #047857 !important; }
+body.exporting-image .text-aksana-primary { color: #064e3b !important; }
+body.exporting-image .text-aksana-accent { color: #047857 !important; }
+body.exporting-image .text-aksana-accent-strong { color: #065f46 !important; }
+
+/* Badge khusus ekspor (mis. status selesai / dipilih). */
+body.exporting-image .export-only {
+  display: inline-flex !important;
+}
+
+/* Teks status sedikit diperbesar agar tetap terbaca setelah PDF diskalakan.
+   inline-block + position relative menghindari bug html2canvas 1.4.1 pada teks
+   di dalam kontainer inline-flex. */
+body.exporting-image .export-only.status-btn,
+body.exporting-image .export-only.jenis-btn,
+body.exporting-image .export-only.outcome-btn {
+  position: relative !important;
+  display: inline-block !important;
+  cursor: default !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+}
+
+body.exporting-image .export-only.status-btn > span,
+body.exporting-image .export-only.jenis-btn > span,
+body.exporting-image .export-only.outcome-btn > span {
+  position: relative !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+body.exporting-image .export-only.status-btn > .status-dot,
+body.exporting-image .export-only.jenis-btn > .status-dot,
+body.exporting-image .export-only.outcome-btn > .status-dot {
+  margin-right: 6px !important;
+}
+
+/* Header tabel sticky bisa menimpa konten pada halaman lanjutan hasil ekspor. */
+body.exporting-image th {
+  position: static !important;
+}
+
+/* Kontrol native (select / input) disembunyikan, teks terformat yang difoto. */
+body.exporting-image .print-control {
+  display: none !important;
+}
+
+/* Elemen pseudo dekoratif tombol status tidak perlu ikut difoto. */
+.status-btn::before,
+.jenis-btn::before,
+.outcome-btn::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* ==========================================================================
+   IDS Discuss — ekspor satu lembar (1280x720)
+   --------------------------------------------------------------------------
+   Hanya aktif saat `body.exporting-image`. Tujuannya memadatkan slide Discuss
+   agar seluruh analisa (topik, kondisi, fishbone, 5-Why, 5W+1H) muat dalam
+   satu halaman tanpa mengubah tampilan aplikasi sehari-hari.
+   ========================================================================== */
+
+/* Elemen bantu yang tidak perlu ikut tercetak (stepper, paragraf petunjuk,
+   catatan metodologi). */
+body.exporting-image [data-export-hide] {
+  display: none !important;
+}
+
+/* Ringkasan faktor Fishbone: hanya muncul di hasil ekspor. */
+.export-block-only {
+  display: none !important;
+}
+
+body.exporting-image .export-block-only {
+  display: block !important;
+}
+
+body.exporting-image section.slide.active.slide-ids-discuss {
+  padding: 16px 28px 18px !important;
+}
+
+body.exporting-image .slide-ids-discuss > div:first-child {
+  gap: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .slide-title {
+  font-size: 20px !important;
+  line-height: 1.1 !important;
+}
+
+body.exporting-image .slide-ids-discuss .subtitle {
+  display: none !important;
+}
+
+body.exporting-image .slide-ids-discuss .slide-kicker {
+  font-size: 9px !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Kerapatan umum */
+body.exporting-image .slide-ids-discuss .rounded-xl {
+  border-radius: 8px !important;
+}
+
+body.exporting-image .slide-ids-discuss .p-3 {
+  padding: 6px 8px !important;
+}
+
+body.exporting-image .slide-ids-discuss .p-2\.5 {
+  padding: 4px 6px !important;
+}
+
+body.exporting-image .slide-ids-discuss .p-2 {
+  padding: 3px 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .px-2\.5 {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+body.exporting-image .slide-ids-discuss .gap-3 {
+  gap: 6px !important;
+}
+
+body.exporting-image .slide-ids-discuss .gap-2 {
+  gap: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .gap-1\.5 {
+  gap: 3px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mb-2 {
+  margin-bottom: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mb-1\.5 {
+  margin-bottom: 3px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mb-1 {
+  margin-bottom: 2px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mt-3 {
+  margin-top: 6px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mt-2 {
+  margin-top: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mt-1\.5 {
+  margin-top: 3px !important;
+}
+
+body.exporting-image .slide-ids-discuss .mt-0\.5 {
+  margin-top: 2px !important;
+}
+
+body.exporting-image .slide-ids-discuss .space-y-2 > * + * {
+  margin-top: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .space-y-1\.5 > * + * {
+  margin-top: 3px !important;
+}
+
+/* Tipografi padat namun tetap terbaca */
+body.exporting-image .slide-ids-discuss .text-sm {
+  font-size: 10.5px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-xs {
+  font-size: 9.5px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-base {
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-lg {
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-\[11px\] {
+  font-size: 9px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-\[10px\] {
+  font-size: 8px !important;
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .text-\[9px\] {
+  font-size: 7.5px !important;
+  line-height: 1.3 !important;
+}
+
+/* Cermin teks Editable: rapatkan tinggi baris agar tidak memakan ruang. */
+body.exporting-image .slide-ids-discuss .print-clone {
+  line-height: 1.3 !important;
+}
+
+body.exporting-image .slide-ids-discuss .print-clone > div {
+  min-height: 0 !important;
+  line-height: 1.3 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Field kosong: placeholder tidak ikut tercetak, tetapi ruang barisnya tetap
+   dipertahankan agar tinggi field di layar tidak berubah. */
+body.exporting-image .slide-ids-discuss .print-clone[data-hide-print-placeholder="true"] {
+  color: transparent !important;
+}
+
+/* Matriks 5W+1H */
+body.exporting-image .slide-ids-discuss table {
+  margin-bottom: 0 !important;
+}
+
+body.exporting-image .slide-ids-discuss table th,
+body.exporting-image .slide-ids-discuss table td {
+  padding: 2px 4px !important;
+  font-size: 9px !important;
+  line-height: 1.25 !important;
+}
+
+body.exporting-image .slide-ids-discuss .empty-state {
+  padding: 10px 8px !important;
+  gap: 4px !important;
+}
+
+body.exporting-image .slide-ids-discuss .empty-state-icon {
+  font-size: 20px !important;
+}
